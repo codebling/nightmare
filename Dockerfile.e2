@@ -1,0 +1,21 @@
+FROM node:buster-slim
+
+RUN apt-get update && apt-get install -y tini libgtk-3-0 libx11-xcb1 libxcb1 libxss1 libgconf-2-4 libnss3 libasound2 xvfb
+
+# Create app directory
+WORKDIR /usr/src/app
+
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# where available (npm@5+)
+COPY package*.json ./
+
+RUN npm install
+
+# Bundle app source
+COPY . .
+
+ENV DEBUG=nightmare,nightmare:*,electron:*
+ENV DISPLAY=:9.0
+
+CMD ["bash", "-c", "Xvfb -ac -screen scrn 1280x2000x24 :9.0 & ./node_modules/.bin/mocha --grep 'should return data about the response'"]
